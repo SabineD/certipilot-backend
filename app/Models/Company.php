@@ -14,6 +14,11 @@ class Company extends Model
     protected $keyType = 'string';
     public $incrementing = false;
 
+    protected $fillable = [
+        'name',
+        'vat_number',
+    ];
+
     public function users(): HasMany
     {
         return $this->hasMany(User::class);
