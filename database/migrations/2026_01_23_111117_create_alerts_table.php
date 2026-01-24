@@ -11,10 +11,19 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('companies', function (Blueprint $table) {
+        Schema::create('alerts', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->string('name');
-            $table->string('vat_number')->nullable();
+
+            $table->foreignUuid('company_id')
+                  ->constrained()
+                  ->cascadeOnDelete();
+
+            $table->string('related_type'); // inspection | certificate
+            $table->uuid('related_id');
+
+            $table->string('message');
+            $table->boolean('resolved')->default(false);
+
             $table->timestamps();
         });
     }
@@ -24,6 +33,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('companies');
+        Schema::dropIfExists('alerts');
     }
 };

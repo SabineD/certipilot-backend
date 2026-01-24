@@ -12,7 +12,23 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('documents', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
+
+            $table->foreignUuid('certificate_id')
+                  ->nullable()
+                  ->constrained()
+                  ->cascadeOnDelete();
+
+            $table->foreignUuid('inspection_id')
+                  ->nullable()
+                  ->constrained()
+                  ->cascadeOnDelete();
+
+            $table->string('file_name');
+            $table->string('file_path');
+            $table->string('mime_type')->nullable();
+            $table->unsignedBigInteger('file_size')->nullable();
+
             $table->timestamps();
         });
     }

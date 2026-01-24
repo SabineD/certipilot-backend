@@ -12,7 +12,25 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('inspections', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
+
+            $table->foreignUuid('inspection_type_id')
+                  ->constrained()
+                  ->cascadeOnDelete();
+
+            $table->foreignUuid('machine_id')
+                  ->nullable()
+                  ->constrained()
+                  ->cascadeOnDelete();
+
+            $table->foreignUuid('employee_id')
+                  ->nullable()
+                  ->constrained()
+                  ->cascadeOnDelete();
+
+            $table->date('inspection_date');
+            $table->date('expiry_date');
+
             $table->timestamps();
         });
     }

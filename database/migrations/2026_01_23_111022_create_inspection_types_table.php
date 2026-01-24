@@ -11,8 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('roles', function (Blueprint $table) {
-            $table->id();
+        Schema::create('inspection_types', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+
+            $table->string('name');
+            $table->string('applies_to'); // machine | employee
+            $table->unsignedInteger('validity_months');
+
             $table->timestamps();
         });
     }
@@ -22,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('roles');
+        Schema::dropIfExists('inspection_types');
     }
 };

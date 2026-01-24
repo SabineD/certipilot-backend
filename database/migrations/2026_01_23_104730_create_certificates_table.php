@@ -12,7 +12,26 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('certificates', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
+
+            $table->foreignUuid('certificate_type_id')
+                  ->constrained()
+                  ->cascadeOnDelete();
+
+            $table->foreignUuid('machine_id')
+                  ->nullable()
+                  ->constrained()
+                  ->cascadeOnDelete();
+
+            $table->foreignUuid('employee_id')
+                  ->nullable()
+                  ->constrained()
+                  ->cascadeOnDelete();
+
+            $table->string('file_url');
+            $table->date('issued_date');
+            $table->date('expiry_date');
+
             $table->timestamps();
         });
     }

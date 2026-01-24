@@ -12,7 +12,21 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('employees', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
+
+            $table->foreignUuid('company_id')
+                  ->constrained()
+                  ->cascadeOnDelete();
+
+            $table->foreignUuid('site_id')
+                  ->nullable()
+                  ->constrained()
+                  ->nullOnDelete();
+
+            $table->string('name');
+            $table->string('job_title')->nullable();
+            $table->boolean('active')->default(true);
+
             $table->timestamps();
         });
     }

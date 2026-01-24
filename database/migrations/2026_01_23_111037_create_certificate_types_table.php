@@ -11,10 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('companies', function (Blueprint $table) {
+        Schema::create('certificate_types', function (Blueprint $table) {
             $table->uuid('id')->primary();
+
             $table->string('name');
-            $table->string('vat_number')->nullable();
+            $table->string('applies_to'); // machine | employee
+
             $table->timestamps();
         });
     }
@@ -24,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('companies');
+        Schema::dropIfExists('certificate_types');
     }
 };
