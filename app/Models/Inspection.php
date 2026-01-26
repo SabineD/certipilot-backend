@@ -14,6 +14,10 @@ class Inspection extends Model
 
     protected $keyType = 'string';
     public $incrementing = false;
+    protected $casts = [
+      'inspection_date' => 'date',
+      'expiry_date' => 'date',
+    ];
 
     public function company(): BelongsTo
     {

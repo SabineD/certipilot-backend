@@ -13,6 +13,10 @@ class Certificate extends Model
 
     protected $keyType = 'string';
     public $incrementing = false;
+    protected $casts = [
+    'issued_date' => 'date',
+    'expiry_date' => 'date',
+    ];
 
     public function certificateType(): BelongsTo
     {
