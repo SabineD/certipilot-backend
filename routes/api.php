@@ -18,6 +18,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/sites/{id}', [SiteController::class, 'show']);
     Route::get('/machines', [MachineController::class, 'index']);
     Route::get('/machines/{id}', [MachineController::class, 'show']);
+    Route::post('/machines', [MachineController::class, 'store']);
+    Route::put('/machines/{id}', [MachineController::class, 'update']);
+    Route::delete('/machines/{id}', [MachineController::class, 'destroy']);
     Route::get('/employees', [EmployeeController::class, 'index']);
     Route::get('/employees/{id}', [EmployeeController::class, 'show']);
 });

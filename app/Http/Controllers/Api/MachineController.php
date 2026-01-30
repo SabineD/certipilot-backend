@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreMachineRequest;
+use App\Http\Requests\UpdateMachineRequest;
 use App\Models\Machine;
 use Illuminate\Http\Request;
 
@@ -13,27 +15,16 @@ class MachineController extends Controller
      */
     public function index(Request $request)
     {
-    $company = $request->user()->company;
+        $company = $request->user()->company;
 
-    $machines = Machine::where('company_id', $company->id)
-        ->with([
-            'site',
-            'inspections',
-            'certificates',
-        ])
-        ->orderBy('name')
-        ->get()
-        ->map(function (Machine $machine) {
-            return [
-                'id' => $machine->id,
-                'name' => $machine->name,
-                'type' => $machine->type,
-                'site' => $machine->site,
-                'status' => $this->calculateMachineStatus($machine),
-            ];
-        });
+        $machines = Machine::where('company_id', $company->id)
+            ->where('is_active', true)
+            ->with('site:id,name')
+            ->orderBy('name')
+            ->get()
+            ->map(fn (Machine $machine) => $this->formatMachine($machine));
 
-    return response()->json($machines);
+        return response()->json($machines);
     }
 
     /**
@@ -45,39 +36,89 @@ class MachineController extends Controller
 
         $machine = Machine::where('company_id', $company->id)
             ->where('id', $id)
-           ->with([
-            'site',
-            'inspections.inspectionType',
-            'certificates.certificateType',
-        ])
-        ->firstOrFail();
+            ->with('site:id,name')
+            ->firstOrFail();
 
-    return response()->json([
-        'machine' => $machine,
-        'status' => $this->calculateMachineStatus($machine),
-    ]);
+        return response()->json($this->formatMachine($machine));
     }
 
-    private function calculateMachineStatus(Machine $machine): string
+    /**
+     * Machine aanmaken
+     */
+    public function store(StoreMachineRequest $request)
     {
-    $now = now();
+        $company = $request->user()->company;
+        $data = $request->validated();
 
-    // Verlopen?
-    if (
-        $machine->inspections->contains(fn ($i) => $i->expiry_date < $now) ||
-        $machine->certificates->contains(fn ($c) => $c->expiry_date < $now)
-    ) {
-        return 'verlopen';
+        $machine = new Machine();
+        $machine->company_id = $company->id;
+        $machine->site_id = $data['site_id'] ?? null;
+        $machine->name = $data['name'];
+        $machine->type = $data['type'];
+        $machine->serial_number = $data['serial_number'] ?? null;
+        $machine->is_active = true;
+        $machine->save();
+
+        $machine->load('site:id,name');
+
+        return response()->json($this->formatMachine($machine), 201);
     }
 
-    // Binnenkort? (30 dagen)
-    if (
-        $machine->inspections->contains(fn ($i) => $i->expiry_date < $now->copy()->addDays(30)) ||
-        $machine->certificates->contains(fn ($c) => $c->expiry_date < $now->copy()->addDays(30))
-    ) {
-        return 'binnenkort';
+    /**
+     * Machine bijwerken
+     */
+    public function update(UpdateMachineRequest $request, string $id)
+    {
+        $company = $request->user()->company;
+        $data = $request->validated();
+
+        $machine = Machine::where('company_id', $company->id)
+            ->where('id', $id)
+            ->firstOrFail();
+
+        $machine->site_id = $data['site_id'] ?? null;
+        $machine->name = $data['name'];
+        $machine->type = $data['type'];
+        $machine->serial_number = $data['serial_number'] ?? null;
+        $machine->save();
+
+        $machine->load('site:id,name');
+
+        return response()->json($this->formatMachine($machine));
     }
 
-    return 'ok';
+    /**
+     * Machine uitschakelen (soft delete)
+     */
+    public function destroy(Request $request, string $id)
+    {
+        $company = $request->user()->company;
+
+        $machine = Machine::where('company_id', $company->id)
+            ->where('id', $id)
+            ->firstOrFail();
+
+        $machine->is_active = false;
+        $machine->save();
+
+        return response()->noContent();
+    }
+
+    private function formatMachine(Machine $machine): array
+    {
+        return [
+            'id' => $machine->id,
+            'name' => $machine->name,
+            'type' => $machine->type,
+            'serial_number' => $machine->serial_number,
+            'is_active' => (bool) $machine->is_active,
+            'site' => $machine->site
+                ? [
+                    'id' => $machine->site->id,
+                    'name' => $machine->site->name,
+                ]
+                : null,
+            'status' => 'compliant',
+        ];
     }
 }
