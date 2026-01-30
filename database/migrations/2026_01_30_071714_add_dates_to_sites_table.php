@@ -22,8 +22,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('sites', function (Blueprint $table) {
-            $table->dropColumn(['start_date', 'end_date']);
-        });
+        // Intentionally left empty
     }
 };

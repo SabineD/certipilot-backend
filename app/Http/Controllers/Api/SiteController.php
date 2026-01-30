@@ -48,8 +48,34 @@ class SiteController extends Controller
             ])
             ->firstOrFail();
 
-        return response()->json(
-            $complianceService->buildSiteDetail($site)
-        );
+        return response()->json([
+            'id' => $site->id,
+            'name' => $site->name,
+            'status' => null,
+            'employees' => $site->employees->map(function ($employee) {
+                return [
+                    'id' => $employee->id,
+                    'name' => $employee->name,
+                    'role' => $employee->job_title,
+                    'status' => null,
+                    'issue' => null,
+                ];
+            }),
+            'machines' => $site->machines->map(function ($machine) {
+                return [
+                    'id' => $machine->id,
+                    'name' => $machine->name,
+                    'type' => $machine->type,
+                    'lastInspection' => null,
+                    'validUntil' => null,
+                    'status' => null,
+                ];
+            }),
+            'meta' => [
+                'address' => $site->address,
+                'startDate' => optional($site->start_date)?->toDateString(),
+                'endDate' => optional($site->end_date)?->toDateString(),
+            ],
+        ]);
     }
 }
