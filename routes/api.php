@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\MachineController;
 use App\Http\Controllers\Api\EmployeeController;
 use App\Http\Controllers\Api\DashboardController;
+use App\Http\Controllers\Api\SiteController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use Laravel\Sanctum\Http\Controllers\CsrfCookieController;
 
@@ -13,6 +14,8 @@ Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
 });
 
 Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/sites', [SiteController::class, 'index']);
+    Route::get('/sites/{id}', [SiteController::class, 'show']);
     Route::get('/machines', [MachineController::class, 'index']);
     Route::get('/machines/{id}', [MachineController::class, 'show']);
     Route::get('/employees', [EmployeeController::class, 'index']);
