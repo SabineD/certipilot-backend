@@ -34,9 +34,4 @@ class Site extends Model
     {
         return $this->hasMany(Machine::class);
     }
-
-    public function siteDocuments(): HasMany
-    {
-        return $this->hasMany(SiteDocument::class);
-    }
 }

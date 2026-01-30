@@ -12,7 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('sites', function (Blueprint $table) {
-            //
+            $table->date('start_date')->nullable()->after('address');
+            $table->date('end_date')->nullable()->after('start_date');
         });
     }
 
@@ -22,7 +23,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('sites', function (Blueprint $table) {
-            //
+            $table->dropColumn(['start_date', 'end_date']);
         });
     }
 };

@@ -45,7 +45,6 @@ class SiteController extends Controller
             ->with([
                 'employees' => fn ($query) => $query->orderBy('name')->with(['inspections', 'certificates']),
                 'machines' => fn ($query) => $query->orderBy('name')->with(['inspections', 'certificates']),
-                'siteDocuments' => fn ($query) => $query->orderByDesc('uploaded_at'),
             ])
             ->firstOrFail();
 
