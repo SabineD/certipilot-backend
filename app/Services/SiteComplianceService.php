@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Employee;
 use App\Models\Machine;
 use App\Models\Site;
+use App\Models\SiteDocument;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 
@@ -14,6 +15,7 @@ class SiteComplianceService
     {
         $employees = $site->employees ?? collect();
         $machines = $site->machines ?? collect();
+        $documents = $site->siteDocuments ?? collect();
 
         $employeeItems = $employees->map(fn (Employee $employee) => $this->formatEmployee($employee));
         $machineItems = $machines->map(fn (Machine $machine) => $this->formatMachine($machine));
@@ -33,7 +35,7 @@ class SiteComplianceService
             ],
             'employees' => $employeeItems->values()->all(),
             'machines' => $machineItems->values()->all(),
-            'documents' => [],
+            'documents' => $this->normalizeDocuments($documents)->values()->all(),
             'meta' => [
                 'address' => $site->address,
                 'siteManager' => null,
@@ -41,6 +43,19 @@ class SiteComplianceService
                 'endDate' => null,
             ],
         ];
+    }
+
+    private function normalizeDocuments(Collection $documents): Collection
+    {
+        return $documents->map(function (SiteDocument $document) {
+            return [
+                'id' => $document->id,
+                'name' => $document->name,
+                'type' => $document->type,
+                'status' => $document->status,
+                'uploadedAt' => $document->uploaded_at?->toDateString(),
+            ];
+        });
     }
 
     private function formatEmployee(Employee $employee): array

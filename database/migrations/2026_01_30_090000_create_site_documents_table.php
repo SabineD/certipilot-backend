@@ -11,18 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('sites', function (Blueprint $table) {
+        Schema::create('site_documents', function (Blueprint $table) {
             $table->uuid('id')->primary();
 
-            $table->foreignUuid('company_id')
-                  ->constrained()
-                  ->cascadeOnDelete();
+            $table->foreignUuid('site_id')
+                ->constrained()
+                ->cascadeOnDelete();
 
             $table->string('name');
-            $table->string('address')->nullable();
-
-            $table->date('start_date')->nullable()->after('address');
-            $table->date('end_date')->nullable()->after('start_date');
+            $table->enum('type', ['safety_plan', 'permit', 'toolbox', 'other']);
+            $table->enum('status', ['valid', 'expired', 'expiring_soon']);
+            $table->timestamp('uploaded_at')->nullable();
 
             $table->timestamps();
         });
@@ -33,6 +32,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('sites');
+        Schema::dropIfExists('site_documents');
     }
 };

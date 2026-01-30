@@ -15,6 +15,11 @@ class Site extends Model
     protected $keyType = 'string';
     public $incrementing = false;
 
+    protected $casts = [
+    'start_date' => 'date',
+    'end_date' => 'date',
+];
+
     public function company(): BelongsTo
     {
         return $this->belongsTo(Company::class);
@@ -28,5 +33,10 @@ class Site extends Model
     public function machines(): HasMany
     {
         return $this->hasMany(Machine::class);
+    }
+
+    public function siteDocuments(): HasMany
+    {
+        return $this->hasMany(SiteDocument::class);
     }
 }
