@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\EmployeeController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\SiteController;
 use App\Http\Controllers\Api\SearchController;
+use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use Laravel\Sanctum\Http\Controllers\CsrfCookieController;
 
@@ -52,6 +53,11 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/certificates/{id}', [CertificateController::class, 'show']);
         Route::get('/machines/{machineId}/inspections', [InspectionController::class, 'index']);
         Route::get('/inspections/{id}', [InspectionController::class, 'show']);
+    });
+
+    Route::middleware('role:admin')->group(function () {
+        Route::get('/users', [UserController::class, 'index']);
+        Route::post('/users', [UserController::class, 'store']);
     });
 });
 
