@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\CertificateController;
 use App\Http\Controllers\Api\EmployeeController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\SiteController;
+use App\Http\Controllers\Api\SearchController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use Laravel\Sanctum\Http\Controllers\CsrfCookieController;
 
@@ -16,6 +17,7 @@ Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
 });
 
 Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/search', [SearchController::class, 'index']);
     Route::get('/sites', [SiteController::class, 'index']);
     Route::get('/sites/{id}', [SiteController::class, 'show']);
     Route::post('/sites', [SiteController::class, 'store']);
