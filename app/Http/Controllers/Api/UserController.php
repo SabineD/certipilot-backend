@@ -5,8 +5,9 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreUserRequest;
 use App\Models\User;
-use App\Notifications\InviteUserNotification;
+use App\Mail\UserInviteMail;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Password;
 
 class UserController extends Controller
@@ -42,7 +43,7 @@ class UserController extends Controller
         $user->save();
 
         $token = Password::broker()->createToken($user);
-        $user->notify(new InviteUserNotification($token));
+        Mail::to($user->email)->send(new UserInviteMail($user, $token));
 
         return response()->json([
             'id' => $user->id,
