@@ -38,7 +38,9 @@ class SiteController extends Controller
             ->where('id', $id)
             ->with([
                 'employees' => fn ($query) => $query->orderBy('last_name')->orderBy('first_name'),
-                'machines' => fn ($query) => $query->orderBy('name'),
+                'machines' => fn ($query) => $query->orderBy('name')->with([
+                    'latestInspection:id,machine_id,inspected_at,valid_until',
+                ]),
             ])
             ->firstOrFail();
 
@@ -135,7 +137,9 @@ class SiteController extends Controller
                 return [
                     'id' => $machine->id,
                     'name' => $machine->name,
-                    'status' => 'compliant',
+                    'last_inspection' => $machine->lastInspectionDate(),
+                    'valid_until' => $machine->validUntilDate(),
+                    'status' => $machine->inspectionStatus(),
                 ];
             })->values(),
             'employees' => $site->employees->map(function ($employee) {

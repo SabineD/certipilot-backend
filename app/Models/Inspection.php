@@ -15,18 +15,13 @@ class Inspection extends Model
     protected $keyType = 'string';
     public $incrementing = false;
     protected $casts = [
-      'inspection_date' => 'date',
-      'expiry_date' => 'date',
+        'inspected_at' => 'date',
+        'valid_until' => 'date',
     ];
 
     public function company(): BelongsTo
     {
         return $this->belongsTo(Company::class);
-    }
-
-    public function inspectionType(): BelongsTo
-    {
-        return $this->belongsTo(InspectionType::class);
     }
 
     public function machine(): BelongsTo

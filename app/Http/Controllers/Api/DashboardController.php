@@ -129,14 +129,14 @@ class DashboardController extends Controller
         $now = now();
 
         if (
-            $machine->inspections->contains(fn ($i) => $i->expiry_date < $now) ||
+            $machine->inspections->contains(fn ($i) => $i->valid_until < $now) ||
             $machine->certificates->contains(fn ($c) => $c->expiry_date < $now)
         ) {
             return 'expired';
         }
 
         if (
-            $machine->inspections->contains(fn ($i) => $i->expiry_date < $now->copy()->addDays(30)) ||
+            $machine->inspections->contains(fn ($i) => $i->valid_until < $now->copy()->addDays(30)) ||
             $machine->certificates->contains(fn ($c) => $c->expiry_date < $now->copy()->addDays(30))
         ) {
             return 'warning';
@@ -150,14 +150,14 @@ class DashboardController extends Controller
         $now = now();
 
         if (
-            $employee->inspections->contains(fn ($i) => $i->expiry_date < $now) ||
+            $employee->inspections->contains(fn ($i) => $i->valid_until < $now) ||
             $employee->certificates->contains(fn ($c) => $c->expiry_date < $now)
         ) {
             return 'expired';
         }
 
         if (
-            $employee->inspections->contains(fn ($i) => $i->expiry_date < $now->copy()->addDays(30)) ||
+            $employee->inspections->contains(fn ($i) => $i->valid_until < $now->copy()->addDays(30)) ||
             $employee->certificates->contains(fn ($c) => $c->expiry_date < $now->copy()->addDays(30))
         ) {
             return 'warning';
@@ -169,7 +169,7 @@ class DashboardController extends Controller
     private function calculateMachineDueDate(Machine $machine): ?string
     {
         $dates = collect()
-            ->merge($machine->inspections->pluck('expiry_date'))
+            ->merge($machine->inspections->pluck('valid_until'))
             ->merge($machine->certificates->pluck('expiry_date'))
             ->filter()
             ->map(fn ($date) => $date instanceof Carbon ? $date : Carbon::parse($date))
@@ -183,7 +183,7 @@ class DashboardController extends Controller
     private function calculateEmployeeDueDate(Employee $employee): ?string
     {
         $dates = collect()
-            ->merge($employee->inspections->pluck('expiry_date'))
+            ->merge($employee->inspections->pluck('valid_until'))
             ->merge($employee->certificates->pluck('expiry_date'))
             ->filter()
             ->map(fn ($date) => $date instanceof Carbon ? $date : Carbon::parse($date))

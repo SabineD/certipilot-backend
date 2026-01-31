@@ -162,7 +162,7 @@ class SiteComplianceService
     private function collectExpiryDates(Collection $inspections, Collection $certificates): Collection
     {
         return $inspections
-            ->pluck('expiry_date')
+            ->pluck('valid_until')
             ->merge($certificates->pluck('expiry_date'))
             ->map(fn ($date) => $this->toCarbon($date))
             ->filter();
@@ -171,7 +171,7 @@ class SiteComplianceService
     private function latestInspectionDate(Collection $inspections): ?string
     {
         $latest = $inspections
-            ->pluck('inspection_date')
+            ->pluck('inspected_at')
             ->map(fn ($date) => $this->toCarbon($date))
             ->filter()
             ->sortDesc()

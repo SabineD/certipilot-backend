@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\MachineController;
+use App\Http\Controllers\Api\InspectionController;
 use App\Http\Controllers\Api\EmployeeController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\SiteController;
@@ -24,6 +25,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/machines', [MachineController::class, 'store']);
     Route::put('/machines/{id}', [MachineController::class, 'update']);
     Route::delete('/machines/{id}', [MachineController::class, 'destroy']);
+    Route::get('/machines/{machineId}/inspections', [InspectionController::class, 'index']);
+    Route::post('/machines/{machineId}/inspections', [InspectionController::class, 'store']);
+    Route::get('/inspections/{id}', [InspectionController::class, 'show']);
+    Route::put('/inspections/{id}', [InspectionController::class, 'update']);
+    Route::delete('/inspections/{id}', [InspectionController::class, 'destroy']);
     Route::get('/employees', [EmployeeController::class, 'index']);
     Route::get('/employees/{id}', [EmployeeController::class, 'show']);
     Route::post('/employees', [EmployeeController::class, 'store']);

@@ -19,7 +19,10 @@ class MachineController extends Controller
 
         $machines = Machine::where('company_id', $company->id)
             ->where('is_active', true)
-            ->with('site:id,name')
+            ->with([
+                'site:id,name',
+                'latestInspection:id,machine_id,inspected_at,valid_until',
+            ])
             ->orderBy('name')
             ->get()
             ->map(fn (Machine $machine) => $this->formatMachine($machine));
@@ -36,7 +39,10 @@ class MachineController extends Controller
 
         $machine = Machine::where('company_id', $company->id)
             ->where('id', $id)
-            ->with('site:id,name')
+            ->with([
+                'site:id,name',
+                'latestInspection:id,machine_id,inspected_at,valid_until',
+            ])
             ->firstOrFail();
 
         return response()->json($this->formatMachine($machine));
@@ -112,13 +118,15 @@ class MachineController extends Controller
             'type' => $machine->type,
             'serial_number' => $machine->serial_number,
             'is_active' => (bool) $machine->is_active,
+            'last_inspection' => $machine->lastInspectionDate(),
+            'valid_until' => $machine->validUntilDate(),
             'site' => $machine->site
                 ? [
                     'id' => $machine->site->id,
                     'name' => $machine->site->name,
                 ]
                 : null,
-            'status' => 'compliant',
+            'status' => $machine->inspectionStatus(),
         ];
     }
 }
