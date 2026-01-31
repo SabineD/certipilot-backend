@@ -19,7 +19,14 @@ class EmployeeController extends Controller
 
         $employees = Employee::where('company_id', $company->id)
             ->where('is_active', true)
-            ->with('site:id,name')
+            ->with([
+                'site:id,name',
+                'latestCertificate' => fn ($query) => $query->select(
+                    'certificates.id',
+                    'certificates.employee_id',
+                    'certificates.valid_until'
+                ),
+            ])
             ->orderBy('last_name')
             ->orderBy('first_name')
             ->get()
@@ -37,7 +44,14 @@ class EmployeeController extends Controller
 
         $employee = Employee::where('company_id', $company->id)
             ->where('id', $id)
-            ->with('site:id,name')
+            ->with([
+                'site:id,name',
+                'latestCertificate' => fn ($query) => $query->select(
+                    'certificates.id',
+                    'certificates.employee_id',
+                    'certificates.valid_until'
+                ),
+            ])
             ->firstOrFail();
 
         return response()->json($this->formatEmployee($employee));
@@ -130,7 +144,7 @@ class EmployeeController extends Controller
                     'name' => $employee->site->name,
                 ]
                 : null,
-            'status' => 'compliant',
+            'status' => $employee->certificateStatus(),
         ];
     }
 }

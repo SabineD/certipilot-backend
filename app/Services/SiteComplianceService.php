@@ -163,7 +163,7 @@ class SiteComplianceService
     {
         return $inspections
             ->pluck('valid_until')
-            ->merge($certificates->pluck('expiry_date'))
+            ->merge($certificates->pluck('valid_until'))
             ->map(fn ($date) => $this->toCarbon($date))
             ->filter();
     }

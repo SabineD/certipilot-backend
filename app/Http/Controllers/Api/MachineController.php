@@ -21,7 +21,12 @@ class MachineController extends Controller
             ->where('is_active', true)
             ->with([
                 'site:id,name',
-                'latestInspection:id,machine_id,inspected_at,valid_until',
+                'latestInspection' => fn ($query) => $query->select(
+                    'inspections.id',
+                    'inspections.machine_id',
+                    'inspections.inspected_at',
+                    'inspections.valid_until'
+                ),
             ])
             ->orderBy('name')
             ->get()
@@ -41,7 +46,12 @@ class MachineController extends Controller
             ->where('id', $id)
             ->with([
                 'site:id,name',
-                'latestInspection:id,machine_id,inspected_at,valid_until',
+                'latestInspection' => fn ($query) => $query->select(
+                    'inspections.id',
+                    'inspections.machine_id',
+                    'inspections.inspected_at',
+                    'inspections.valid_until'
+                ),
             ])
             ->firstOrFail();
 

@@ -37,9 +37,20 @@ class SiteController extends Controller
         $site = Site::where('company_id', $company->id)
             ->where('id', $id)
             ->with([
-                'employees' => fn ($query) => $query->orderBy('last_name')->orderBy('first_name'),
+                'employees' => fn ($query) => $query->orderBy('last_name')->orderBy('first_name')->with([
+                    'latestCertificate' => fn ($certificateQuery) => $certificateQuery->select(
+                        'certificates.id',
+                        'certificates.employee_id',
+                        'certificates.valid_until'
+                    ),
+                ]),
                 'machines' => fn ($query) => $query->orderBy('name')->with([
-                    'latestInspection:id,machine_id,inspected_at,valid_until',
+                    'latestInspection' => fn ($inspectionQuery) => $inspectionQuery->select(
+                        'inspections.id',
+                        'inspections.machine_id',
+                        'inspections.inspected_at',
+                        'inspections.valid_until'
+                    ),
                 ]),
             ])
             ->firstOrFail();
@@ -152,7 +163,7 @@ class SiteController extends Controller
                     'id' => $employee->id,
                     'full_name' => $fullName,
                     'job_title' => $employee->job_title,
-                    'status' => 'compliant',
+                    'status' => $employee->certificateStatus(),
                 ];
             })->values(),
             'meta' => [

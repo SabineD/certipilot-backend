@@ -14,23 +14,22 @@ return new class extends Migration
         Schema::create('certificates', function (Blueprint $table) {
             $table->uuid('id')->primary();
 
-            $table->foreignUuid('certificate_type_id')
-                  ->constrained()
-                  ->cascadeOnDelete();
-
             $table->foreignUuid('machine_id')
                   ->nullable()
                   ->constrained()
                   ->cascadeOnDelete();
 
             $table->foreignUuid('employee_id')
-                  ->nullable()
                   ->constrained()
                   ->cascadeOnDelete();
 
-            $table->string('file_url');
-            $table->date('issued_date');
-            $table->date('expiry_date');
+            $table->foreignUuid('company_id')
+                  ->constrained()
+                  ->cascadeOnDelete();
+
+            $table->string('certificate_type');
+            $table->date('issued_at');
+            $table->date('valid_until');
 
             $table->timestamps();
         });

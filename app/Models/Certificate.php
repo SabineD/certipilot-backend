@@ -14,13 +14,13 @@ class Certificate extends Model
     protected $keyType = 'string';
     public $incrementing = false;
     protected $casts = [
-    'issued_date' => 'date',
-    'expiry_date' => 'date',
+        'issued_at' => 'date',
+        'valid_until' => 'date',
     ];
 
-    public function certificateType(): BelongsTo
+    public function company(): BelongsTo
     {
-        return $this->belongsTo(CertificateType::class);
+        return $this->belongsTo(Company::class);
     }
 
     public function machine(): BelongsTo

@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\MachineController;
 use App\Http\Controllers\Api\InspectionController;
+use App\Http\Controllers\Api\CertificateController;
 use App\Http\Controllers\Api\EmployeeController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\SiteController;
@@ -35,6 +36,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/employees', [EmployeeController::class, 'store']);
     Route::put('/employees/{id}', [EmployeeController::class, 'update']);
     Route::delete('/employees/{id}', [EmployeeController::class, 'destroy']);
+    Route::get('/employees/{employeeId}/certificates', [CertificateController::class, 'index']);
+    Route::post('/employees/{employeeId}/certificates', [CertificateController::class, 'store']);
+    Route::get('/certificates/{id}', [CertificateController::class, 'show']);
+    Route::put('/certificates/{id}', [CertificateController::class, 'update']);
+    Route::delete('/certificates/{id}', [CertificateController::class, 'destroy']);
 });
 
 Route::get('/sanctum/csrf-cookie', [CsrfCookieController::class, 'show']);

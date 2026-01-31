@@ -37,7 +37,9 @@ class Machine extends Model
 
     public function latestInspection(): HasOne
     {
-        return $this->hasOne(Inspection::class)->latestOfMany('inspected_at');
+        return $this->hasOne(Inspection::class)
+            ->latestOfMany('inspected_at')
+            ->select('inspections.*');
     }
 
     public function certificates(): HasMany

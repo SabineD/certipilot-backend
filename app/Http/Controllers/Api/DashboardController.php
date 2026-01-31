@@ -130,14 +130,14 @@ class DashboardController extends Controller
 
         if (
             $machine->inspections->contains(fn ($i) => $i->valid_until < $now) ||
-            $machine->certificates->contains(fn ($c) => $c->expiry_date < $now)
+            $machine->certificates->contains(fn ($c) => $c->valid_until < $now)
         ) {
             return 'expired';
         }
 
         if (
             $machine->inspections->contains(fn ($i) => $i->valid_until < $now->copy()->addDays(30)) ||
-            $machine->certificates->contains(fn ($c) => $c->expiry_date < $now->copy()->addDays(30))
+            $machine->certificates->contains(fn ($c) => $c->valid_until < $now->copy()->addDays(30))
         ) {
             return 'warning';
         }
@@ -151,14 +151,14 @@ class DashboardController extends Controller
 
         if (
             $employee->inspections->contains(fn ($i) => $i->valid_until < $now) ||
-            $employee->certificates->contains(fn ($c) => $c->expiry_date < $now)
+            $employee->certificates->contains(fn ($c) => $c->valid_until < $now)
         ) {
             return 'expired';
         }
 
         if (
             $employee->inspections->contains(fn ($i) => $i->valid_until < $now->copy()->addDays(30)) ||
-            $employee->certificates->contains(fn ($c) => $c->expiry_date < $now->copy()->addDays(30))
+            $employee->certificates->contains(fn ($c) => $c->valid_until < $now->copy()->addDays(30))
         ) {
             return 'warning';
         }
@@ -170,7 +170,7 @@ class DashboardController extends Controller
     {
         $dates = collect()
             ->merge($machine->inspections->pluck('valid_until'))
-            ->merge($machine->certificates->pluck('expiry_date'))
+            ->merge($machine->certificates->pluck('valid_until'))
             ->filter()
             ->map(fn ($date) => $date instanceof Carbon ? $date : Carbon::parse($date))
             ->sort();
@@ -184,7 +184,7 @@ class DashboardController extends Controller
     {
         $dates = collect()
             ->merge($employee->inspections->pluck('valid_until'))
-            ->merge($employee->certificates->pluck('expiry_date'))
+            ->merge($employee->certificates->pluck('valid_until'))
             ->filter()
             ->map(fn ($date) => $date instanceof Carbon ? $date : Carbon::parse($date))
             ->sort();
