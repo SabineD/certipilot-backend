@@ -16,9 +16,10 @@ class Site extends Model
     public $incrementing = false;
 
     protected $casts = [
-    'start_date' => 'date',
-    'end_date' => 'date',
-];
+        'start_date' => 'date',
+        'end_date' => 'date',
+        'is_active' => 'boolean',
+    ];
 
     public function company(): BelongsTo
     {

@@ -16,6 +16,9 @@ Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/sites', [SiteController::class, 'index']);
     Route::get('/sites/{id}', [SiteController::class, 'show']);
+    Route::post('/sites', [SiteController::class, 'store']);
+    Route::put('/sites/{id}', [SiteController::class, 'update']);
+    Route::delete('/sites/{id}', [SiteController::class, 'destroy']);
     Route::get('/machines', [MachineController::class, 'index']);
     Route::get('/machines/{id}', [MachineController::class, 'show']);
     Route::post('/machines', [MachineController::class, 'store']);

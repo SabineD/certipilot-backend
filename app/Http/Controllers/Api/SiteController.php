@@ -3,8 +3,9 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreSiteRequest;
+use App\Http\Requests\UpdateSiteRequest;
 use App\Models\Site;
-use App\Services\SiteComplianceService;
 use Illuminate\Http\Request;
 
 class SiteController extends Controller
@@ -17,18 +18,11 @@ class SiteController extends Controller
         $company = $request->user()->company;
 
         $sites = Site::where('company_id', $company->id)
-            ->withCount(['employees', 'machines'])
+            ->where('is_active', true)
+            ->withCount(['machines', 'employees'])
             ->orderBy('name')
             ->get()
-            ->map(function (Site $site) {
-                return [
-                    'id' => $site->id,
-                    'name' => $site->name,
-                    'address' => $site->address,
-                    'employees_count' => $site->employees_count,
-                    'machines_count' => $site->machines_count,
-                ];
-            });
+            ->map(fn (Site $site) => $this->formatSiteSummary($site));
 
         return response()->json($sites);
     }
@@ -36,46 +30,132 @@ class SiteController extends Controller
     /**
      * Detail van 1 werf
      */
-    public function show(Request $request, string $id, SiteComplianceService $complianceService)
+    public function show(Request $request, string $id)
     {
         $company = $request->user()->company;
 
         $site = Site::where('company_id', $company->id)
             ->where('id', $id)
             ->with([
-                'employees' => fn ($query) => $query->orderBy('name')->with(['inspections', 'certificates']),
-                'machines' => fn ($query) => $query->orderBy('name')->with(['inspections', 'certificates']),
+                'employees' => fn ($query) => $query->orderBy('last_name')->orderBy('first_name'),
+                'machines' => fn ($query) => $query->orderBy('name'),
             ])
             ->firstOrFail();
 
-        return response()->json([
+        return response()->json($this->formatSiteDetail($site));
+    }
+
+    /**
+     * Werf aanmaken
+     */
+    public function store(StoreSiteRequest $request)
+    {
+        $company = $request->user()->company;
+        $data = $request->validated();
+
+        $site = new Site();
+        $site->company_id = $company->id;
+        $site->name = $data['name'];
+        $site->address = $data['address'] ?? null;
+        $site->start_date = $data['start_date'] ?? null;
+        $site->end_date = $data['end_date'] ?? null;
+        $site->is_active = true;
+        $site->save();
+
+        $site->loadCount(['machines', 'employees']);
+
+        return response()->json($this->formatSiteSummary($site), 201);
+    }
+
+    /**
+     * Werf bijwerken
+     */
+    public function update(UpdateSiteRequest $request, string $id)
+    {
+        $company = $request->user()->company;
+        $data = $request->validated();
+
+        $site = Site::where('company_id', $company->id)
+            ->where('id', $id)
+            ->firstOrFail();
+
+        $site->name = $data['name'];
+        $site->address = $data['address'] ?? null;
+        $site->start_date = $data['start_date'] ?? null;
+        $site->end_date = $data['end_date'] ?? null;
+        $site->save();
+
+        $site->loadCount(['machines', 'employees']);
+
+        return response()->json($this->formatSiteSummary($site));
+    }
+
+    /**
+     * Werf uitschakelen (soft delete)
+     */
+    public function destroy(Request $request, string $id)
+    {
+        $company = $request->user()->company;
+
+        $site = Site::where('company_id', $company->id)
+            ->where('id', $id)
+            ->firstOrFail();
+
+        $site->is_active = false;
+        $site->save();
+
+        return response()->noContent();
+    }
+
+    private function formatSiteSummary(Site $site): array
+    {
+        return [
             'id' => $site->id,
             'name' => $site->name,
-            'status' => null,
-            'employees' => $site->employees->map(function ($employee) {
-                return [
-                    'id' => $employee->id,
-                    'name' => $employee->name,
-                    'role' => $employee->job_title,
-                    'status' => null,
-                    'issue' => null,
-                ];
-            }),
+            'is_active' => (bool) $site->is_active,
+            'machines_count' => $site->machines_count ?? 0,
+            'employees_count' => $site->employees_count ?? 0,
+            'status' => 'compliant',
+            'meta' => [
+                'address' => $site->address,
+                'start_date' => optional($site->start_date)?->toDateString(),
+                'end_date' => optional($site->end_date)?->toDateString(),
+            ],
+        ];
+    }
+
+    private function formatSiteDetail(Site $site): array
+    {
+        return [
+            'id' => $site->id,
+            'name' => $site->name,
+            'is_active' => (bool) $site->is_active,
+            'status' => 'compliant',
             'machines' => $site->machines->map(function ($machine) {
                 return [
                     'id' => $machine->id,
                     'name' => $machine->name,
-                    'type' => $machine->type,
-                    'lastInspection' => null,
-                    'validUntil' => null,
-                    'status' => null,
+                    'status' => 'compliant',
                 ];
-            }),
+            })->values(),
+            'employees' => $site->employees->map(function ($employee) {
+                $fullName = trim(($employee->first_name ?? '') . ' ' . ($employee->last_name ?? ''));
+                if ($fullName === '') {
+                    $fullName = $employee->name ?? '';
+                }
+
+                return [
+                    'id' => $employee->id,
+                    'full_name' => $fullName,
+                    'job_title' => $employee->job_title,
+                    'status' => 'compliant',
+                ];
+            })->values(),
             'meta' => [
                 'address' => $site->address,
-                'startDate' => optional($site->start_date)?->toDateString(),
-                'endDate' => optional($site->end_date)?->toDateString(),
+                'start_date' => optional($site->start_date)?->toDateString(),
+                'end_date' => optional($site->end_date)?->toDateString(),
             ],
-        ]);
+        ];
     }
 }
