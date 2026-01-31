@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreEmployeeRequest;
+use App\Http\Requests\UpdateEmployeeRequest;
 use App\Models\Employee;
 use Illuminate\Http\Request;
 
@@ -16,21 +18,12 @@ class EmployeeController extends Controller
         $company = $request->user()->company;
 
         $employees = Employee::where('company_id', $company->id)
-            ->with([
-                'site',
-                'inspections',
-                'certificates',
-            ])
-            ->orderBy('name')
+            ->where('is_active', true)
+            ->with('site:id,name')
+            ->orderBy('last_name')
+            ->orderBy('first_name')
             ->get()
-            ->map(function (Employee $employee) {
-                return [
-                    'id' => $employee->id,
-                    'name' => $employee->name,
-                    'site' => $employee->site,
-                    'status' => $this->calculateEmployeeStatus($employee),
-                ];
-            });
+            ->map(fn (Employee $employee) => $this->formatEmployee($employee));
 
         return response()->json($employees);
     }
@@ -44,39 +37,100 @@ class EmployeeController extends Controller
 
         $employee = Employee::where('company_id', $company->id)
             ->where('id', $id)
-            ->with([
-                'site',
-                'inspections.inspectionType',
-                'certificates.certificateType',
-            ])
+            ->with('site:id,name')
             ->firstOrFail();
 
-        return response()->json([
-            'employee' => $employee,
-            'status' => $this->calculateEmployeeStatus($employee),
-        ]);
+        return response()->json($this->formatEmployee($employee));
     }
 
-    private function calculateEmployeeStatus(Employee $employee): string
+    /**
+     * Werknemer aanmaken
+     */
+    public function store(StoreEmployeeRequest $request)
     {
-        $now = now();
+        $company = $request->user()->company;
+        $data = $request->validated();
 
-        // Verlopen?
-        if (
-            $employee->inspections->contains(fn ($i) => $i->expiry_date < $now) ||
-            $employee->certificates->contains(fn ($c) => $c->expiry_date < $now)
-        ) {
-            return 'verlopen';
-        }
+        $employee = new Employee();
+        $employee->company_id = $company->id;
+        $employee->site_id = $data['site_id'] ?? null;
+        $employee->first_name = $data['first_name'];
+        $employee->last_name = $data['last_name'];
+        $employee->job_title = $data['job_title'];
+        $employee->email = $data['email'] ?? null;
+        $employee->is_active = true;
+        $employee->name = $this->fullName($employee);
+        $employee->save();
 
-        // Binnenkort? (30 dagen)
-        if (
-            $employee->inspections->contains(fn ($i) => $i->expiry_date < $now->copy()->addDays(30)) ||
-            $employee->certificates->contains(fn ($c) => $c->expiry_date < $now->copy()->addDays(30))
-        ) {
-            return 'binnenkort';
-        }
+        $employee->load('site:id,name');
 
-        return 'ok';
+        return response()->json($this->formatEmployee($employee), 201);
+    }
+
+    /**
+     * Werknemer bijwerken
+     */
+    public function update(UpdateEmployeeRequest $request, string $id)
+    {
+        $company = $request->user()->company;
+        $data = $request->validated();
+
+        $employee = Employee::where('company_id', $company->id)
+            ->where('id', $id)
+            ->firstOrFail();
+
+        $employee->site_id = $data['site_id'] ?? null;
+        $employee->first_name = $data['first_name'];
+        $employee->last_name = $data['last_name'];
+        $employee->job_title = $data['job_title'];
+        $employee->email = $data['email'] ?? null;
+        $employee->name = $this->fullName($employee);
+        $employee->save();
+
+        $employee->load('site:id,name');
+
+        return response()->json($this->formatEmployee($employee));
+    }
+
+    /**
+     * Werknemer uitschakelen (soft delete)
+     */
+    public function destroy(Request $request, string $id)
+    {
+        $company = $request->user()->company;
+
+        $employee = Employee::where('company_id', $company->id)
+            ->where('id', $id)
+            ->firstOrFail();
+
+        $employee->is_active = false;
+        $employee->save();
+
+        return response()->noContent();
+    }
+
+    private function fullName(Employee $employee): string
+    {
+        return trim($employee->first_name . ' ' . $employee->last_name);
+    }
+
+    private function formatEmployee(Employee $employee): array
+    {
+        return [
+            'id' => $employee->id,
+            'first_name' => $employee->first_name,
+            'last_name' => $employee->last_name,
+            'full_name' => $this->fullName($employee),
+            'job_title' => $employee->job_title,
+            'email' => $employee->email,
+            'is_active' => (bool) $employee->is_active,
+            'site' => $employee->site
+                ? [
+                    'id' => $employee->site->id,
+                    'name' => $employee->site->name,
+                ]
+                : null,
+            'status' => 'compliant',
+        ];
     }
 }

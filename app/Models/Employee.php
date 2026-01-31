@@ -14,6 +14,9 @@ class Employee extends Model
 
     protected $keyType = 'string';
     public $incrementing = false;
+    protected $casts = [
+        'is_active' => 'boolean',
+    ];
 
     public function company(): BelongsTo
     {
