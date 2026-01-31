@@ -23,7 +23,6 @@ class EmployeeSeeder extends Seeder
             'job_title' => 'Werfleider',
             'email' => 'pieter.janssens@example.com',
             'is_active' => true,
-            'active' => true,
         ]);
 
         Employee::create([
@@ -35,7 +34,6 @@ class EmployeeSeeder extends Seeder
             'job_title' => 'Preventieadviseur',
             'email' => 'sarah.desmet@example.com',
             'is_active' => true,
-            'active' => true,
         ]);
 
         Employee::create([
@@ -47,7 +45,6 @@ class EmployeeSeeder extends Seeder
             'job_title' => 'Arbeider',
             'email' => 'tom.vermeulen@example.com',
             'is_active' => true,
-            'active' => true,
         ]);
     }
 }
