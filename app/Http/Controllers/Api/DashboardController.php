@@ -86,6 +86,7 @@ class DashboardController extends Controller
                     'due_date' => $machine['due_date'],
                 ];
             })
+            ->toBase()
             ->merge($problemEmployees->map(function (array $employee) {
                 return [
                     'type' => 'employee',
