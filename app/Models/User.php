@@ -15,6 +15,10 @@ class User extends Authenticatable
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasApiTokens, HasFactory, Notifiable, HasUuids;
 
+    public const ROLE_ADMIN = 'admin';
+    public const ROLE_WERFLEIDER = 'werfleider';
+    public const ROLE_PREVENTIEADVISEUR = 'preventieadviseur';
+
     protected $keyType = 'string';
     public $incrementing = false;
 
@@ -28,6 +32,7 @@ class User extends Authenticatable
         'email',
         'password',
         'company_id',
+        'role',
     ];
 
     /**
@@ -56,5 +61,20 @@ class User extends Authenticatable
     public function company(): BelongsTo
     {
         return $this->belongsTo(Company::class);
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->role === self::ROLE_ADMIN;
+    }
+
+    public function isWerfleider(): bool
+    {
+        return $this->role === self::ROLE_WERFLEIDER;
+    }
+
+    public function isPreventieadviseur(): bool
+    {
+        return $this->role === self::ROLE_PREVENTIEADVISEUR;
     }
 }

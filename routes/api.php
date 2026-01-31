@@ -18,31 +18,41 @@ Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/search', [SearchController::class, 'index']);
-    Route::get('/sites', [SiteController::class, 'index']);
-    Route::get('/sites/{id}', [SiteController::class, 'show']);
-    Route::post('/sites', [SiteController::class, 'store']);
-    Route::put('/sites/{id}', [SiteController::class, 'update']);
-    Route::delete('/sites/{id}', [SiteController::class, 'destroy']);
-    Route::get('/machines', [MachineController::class, 'index']);
-    Route::get('/machines/{id}', [MachineController::class, 'show']);
-    Route::post('/machines', [MachineController::class, 'store']);
-    Route::put('/machines/{id}', [MachineController::class, 'update']);
-    Route::delete('/machines/{id}', [MachineController::class, 'destroy']);
-    Route::get('/machines/{machineId}/inspections', [InspectionController::class, 'index']);
-    Route::post('/machines/{machineId}/inspections', [InspectionController::class, 'store']);
-    Route::get('/inspections/{id}', [InspectionController::class, 'show']);
-    Route::put('/inspections/{id}', [InspectionController::class, 'update']);
-    Route::delete('/inspections/{id}', [InspectionController::class, 'destroy']);
-    Route::get('/employees', [EmployeeController::class, 'index']);
-    Route::get('/employees/{id}', [EmployeeController::class, 'show']);
-    Route::post('/employees', [EmployeeController::class, 'store']);
-    Route::put('/employees/{id}', [EmployeeController::class, 'update']);
-    Route::delete('/employees/{id}', [EmployeeController::class, 'destroy']);
-    Route::get('/employees/{employeeId}/certificates', [CertificateController::class, 'index']);
-    Route::post('/employees/{employeeId}/certificates', [CertificateController::class, 'store']);
-    Route::get('/certificates/{id}', [CertificateController::class, 'show']);
-    Route::put('/certificates/{id}', [CertificateController::class, 'update']);
-    Route::delete('/certificates/{id}', [CertificateController::class, 'destroy']);
+
+    Route::middleware('role:admin,werfleider')->group(function () {
+        Route::get('/sites', [SiteController::class, 'index']);
+        Route::get('/sites/{id}', [SiteController::class, 'show']);
+        Route::post('/sites', [SiteController::class, 'store']);
+        Route::put('/sites/{id}', [SiteController::class, 'update']);
+        Route::delete('/sites/{id}', [SiteController::class, 'destroy']);
+
+        Route::get('/machines', [MachineController::class, 'index']);
+        Route::get('/machines/{id}', [MachineController::class, 'show']);
+        Route::post('/machines', [MachineController::class, 'store']);
+        Route::put('/machines/{id}', [MachineController::class, 'update']);
+        Route::delete('/machines/{id}', [MachineController::class, 'destroy']);
+
+        Route::post('/machines/{machineId}/inspections', [InspectionController::class, 'store']);
+        Route::put('/inspections/{id}', [InspectionController::class, 'update']);
+        Route::delete('/inspections/{id}', [InspectionController::class, 'destroy']);
+
+        Route::post('/employees', [EmployeeController::class, 'store']);
+        Route::put('/employees/{id}', [EmployeeController::class, 'update']);
+        Route::delete('/employees/{id}', [EmployeeController::class, 'destroy']);
+
+        Route::post('/employees/{employeeId}/certificates', [CertificateController::class, 'store']);
+        Route::put('/certificates/{id}', [CertificateController::class, 'update']);
+        Route::delete('/certificates/{id}', [CertificateController::class, 'destroy']);
+    });
+
+    Route::middleware('role:admin,werfleider,preventieadviseur')->group(function () {
+        Route::get('/employees', [EmployeeController::class, 'index']);
+        Route::get('/employees/{id}', [EmployeeController::class, 'show']);
+        Route::get('/employees/{employeeId}/certificates', [CertificateController::class, 'index']);
+        Route::get('/certificates/{id}', [CertificateController::class, 'show']);
+        Route::get('/machines/{machineId}/inspections', [InspectionController::class, 'index']);
+        Route::get('/inspections/{id}', [InspectionController::class, 'show']);
+    });
 });
 
 Route::get('/sanctum/csrf-cookie', [CsrfCookieController::class, 'show']);
