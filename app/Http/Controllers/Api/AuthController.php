@@ -18,7 +18,7 @@ class AuthController extends Controller
 
         $user = User::where('email', $data['email'])->first();
 
-        if (! $user || ! Hash::check($data['password'], $user->password)) {
+        if (! $user || ! $user->password || ! Hash::check($data['password'], $user->password)) {
             return response()->json([
                 'message' => 'Ongeldige login',
             ], 401);

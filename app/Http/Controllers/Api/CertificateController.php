@@ -7,6 +7,7 @@ use App\Http\Requests\StoreCertificateRequest;
 use App\Http\Requests\UpdateCertificateRequest;
 use App\Models\Certificate;
 use App\Models\Employee;
+use App\Services\CertificateComplianceService;
 use Illuminate\Http\Request;
 
 class CertificateController extends Controller
@@ -48,7 +49,7 @@ class CertificateController extends Controller
     /**
      * Attest aanmaken
      */
-    public function store(StoreCertificateRequest $request, string $employeeId)
+    public function store(StoreCertificateRequest $request, string $employeeId, CertificateComplianceService $complianceService)
     {
         $company = $request->user()->company;
         $data = $request->validated();
@@ -56,6 +57,8 @@ class CertificateController extends Controller
         $employee = Employee::where('company_id', $company->id)
             ->where('id', $employeeId)
             ->firstOrFail();
+
+        $previousStatus = $employee->certificateStatus();
 
         $certificate = new Certificate();
         $certificate->company_id = $company->id;
@@ -65,13 +68,16 @@ class CertificateController extends Controller
         $certificate->valid_until = $data['valid_until'];
         $certificate->save();
 
+        $employee->refresh();
+        $complianceService->handleEmployee($employee, $previousStatus);
+
         return response()->json($this->formatCertificate($certificate), 201);
     }
 
     /**
      * Attest bijwerken
      */
-    public function update(UpdateCertificateRequest $request, string $id)
+    public function update(UpdateCertificateRequest $request, string $id, CertificateComplianceService $complianceService)
     {
         $company = $request->user()->company;
         $data = $request->validated();
@@ -80,10 +86,20 @@ class CertificateController extends Controller
             ->where('id', $id)
             ->firstOrFail();
 
+        $employee = Employee::where('company_id', $company->id)
+            ->where('id', $certificate->employee_id)
+            ->first();
+        $previousStatus = $employee?->certificateStatus();
+
         $certificate->certificate_type = $data['certificate_type'];
         $certificate->issued_at = $data['issued_at'];
         $certificate->valid_until = $data['valid_until'];
         $certificate->save();
+
+        if ($employee) {
+            $employee->refresh();
+            $complianceService->handleEmployee($employee, $previousStatus);
+        }
 
         return response()->json($this->formatCertificate($certificate));
     }
@@ -91,7 +107,7 @@ class CertificateController extends Controller
     /**
      * Attest verwijderen
      */
-    public function destroy(Request $request, string $id)
+    public function destroy(Request $request, string $id, CertificateComplianceService $complianceService)
     {
         $company = $request->user()->company;
 
@@ -99,7 +115,17 @@ class CertificateController extends Controller
             ->where('id', $id)
             ->firstOrFail();
 
+        $employee = Employee::where('company_id', $company->id)
+            ->where('id', $certificate->employee_id)
+            ->first();
+        $previousStatus = $employee?->certificateStatus();
+
         $certificate->delete();
+
+        if ($employee) {
+            $employee->refresh();
+            $complianceService->handleEmployee($employee, $previousStatus);
+        }
 
         return response()->noContent();
     }

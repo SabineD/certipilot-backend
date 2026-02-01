@@ -4,10 +4,11 @@ namespace App\Mail;
 
 use App\Models\User;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 
-class UserInviteMail extends Mailable
+class UserInvitationMail extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
 
@@ -23,7 +24,7 @@ class UserInviteMail extends Mailable
         $url = $baseUrl . '/reset-password?token=' . urlencode($this->token) . '&email=' . urlencode($this->user->email);
 
         return $this->subject('Je CertiPilot account is aangemaakt')
-            ->markdown('emails.user-invite', [
+            ->markdown('emails.user-invitation', [
                 'user' => $this->user,
                 'url' => $url,
             ]);

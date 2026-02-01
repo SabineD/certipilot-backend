@@ -65,6 +65,10 @@ return [
             'transport' => 'resend',
         ],
 
+        'mailgun' => [
+            'transport' => 'mailgun',
+        ],
+
         'sendmail' => [
             'transport' => 'sendmail',
             'path' => env('MAIL_SENDMAIL_PATH', '/usr/sbin/sendmail -bs -i'),
@@ -113,6 +117,14 @@ return [
     'from' => [
         'address' => env('MAIL_FROM_ADDRESS', 'hello@example.com'),
         'name' => env('MAIL_FROM_NAME', 'Example'),
+    ],
+
+    'markdown' => [
+        'theme' => 'certipilot',
+
+        'paths' => [
+            resource_path('views/vendor/mail'),
+        ],
     ],
 
 ];
