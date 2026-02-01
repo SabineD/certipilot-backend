@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\SearchController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\CompanySettingsController;
 use App\Http\Controllers\Api\RegisterController;
+use App\Http\Controllers\Auth\EmailVerificationNotificationController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use Laravel\Sanctum\Http\Controllers\CsrfCookieController;
 
@@ -20,6 +21,8 @@ Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
 });
 
 Route::post('/register', [RegisterController::class, 'store'])->middleware('guest');
+Route::post('/email/verification-notification', [EmailVerificationNotificationController::class, 'store'])
+    ->middleware(['auth:sanctum', 'throttle:6,1']);
 
 Route::middleware(['auth:sanctum', 'verified'])->group(function () {
     Route::get('/search', [SearchController::class, 'index']);
