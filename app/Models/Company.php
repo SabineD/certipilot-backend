@@ -17,6 +17,11 @@ class Company extends Model
     protected $fillable = [
         'name',
         'vat_number',
+        'email_notifications_enabled',
+    ];
+
+    protected $casts = [
+        'email_notifications_enabled' => 'boolean',
     ];
 
     public function users(): HasMany

@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\SiteController;
 use App\Http\Controllers\Api\SearchController;
 use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\Api\CompanySettingsController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use Laravel\Sanctum\Http\Controllers\CsrfCookieController;
 
@@ -19,6 +20,8 @@ Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/search', [SearchController::class, 'index']);
+    Route::get('/settings', [CompanySettingsController::class, 'show']);
+    Route::put('/settings', [CompanySettingsController::class, 'update']);
 
     Route::middleware('role:admin,werfleider')->group(function () {
         Route::get('/sites', [SiteController::class, 'index']);
