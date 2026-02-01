@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\User;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -19,7 +20,17 @@ class CheckRole
             return response()->json(['message' => 'Unauthenticated.'], 401);
         }
 
-        if (empty($roles) || in_array($user->role, $roles, true)) {
+        $role = $user->role;
+
+        if ($role === User::ROLE_ZAAKVOERDER && in_array(User::ROLE_ADMIN, $roles, true)) {
+            return $next($request);
+        }
+
+        if ($role === User::ROLE_ADMIN && in_array(User::ROLE_ZAAKVOERDER, $roles, true)) {
+            return $next($request);
+        }
+
+        if (empty($roles) || in_array($role, $roles, true)) {
             return $next($request);
         }
 

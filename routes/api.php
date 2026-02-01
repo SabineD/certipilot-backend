@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\SiteController;
 use App\Http\Controllers\Api\SearchController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\CompanySettingsController;
+use App\Http\Controllers\Api\RegisterController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use Laravel\Sanctum\Http\Controllers\CsrfCookieController;
 
@@ -18,7 +19,9 @@ Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::middleware('auth:sanctum')->group(function () {
+Route::post('/register', [RegisterController::class, 'store'])->middleware('guest');
+
+Route::middleware(['auth:sanctum', 'verified'])->group(function () {
     Route::get('/search', [SearchController::class, 'index']);
     Route::get('/settings', [CompanySettingsController::class, 'show']);
     Route::put('/settings', [CompanySettingsController::class, 'update']);
@@ -67,6 +70,6 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::get('/sanctum/csrf-cookie', [CsrfCookieController::class, 'show']);
 Route::post('/login', [AuthenticatedSessionController::class, 'store']);
 
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware(['auth:sanctum', 'verified'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index']);
 });

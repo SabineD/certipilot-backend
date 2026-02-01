@@ -17,6 +17,10 @@ class Company extends Model
     protected $fillable = [
         'name',
         'vat_number',
+        'address',
+        'postal_code',
+        'city',
+        'country',
         'email_notifications_enabled',
     ];
 

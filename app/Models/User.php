@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -10,12 +10,13 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasApiTokens, HasFactory, Notifiable, HasUuids;
 
     public const ROLE_ADMIN = 'admin';
+    public const ROLE_ZAAKVOERDER = 'zaakvoerder';
     public const ROLE_WERFLEIDER = 'werfleider';
     public const ROLE_PREVENTIEADVISEUR = 'preventieadviseur';
 
@@ -65,7 +66,12 @@ class User extends Authenticatable
 
     public function isAdmin(): bool
     {
-        return $this->role === self::ROLE_ADMIN;
+        return in_array($this->role, [self::ROLE_ADMIN, self::ROLE_ZAAKVOERDER], true);
+    }
+
+    public function isZaakvoerder(): bool
+    {
+        return $this->role === self::ROLE_ZAAKVOERDER;
     }
 
     public function isWerfleider(): bool
