@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
 
 class Inspection extends Model
 {
@@ -37,5 +38,27 @@ class Inspection extends Model
     public function alerts(): HasMany
     {
         return $this->hasMany(Alert::class);
+    }
+
+    public function status(): ?string
+    {
+        if (! $this->valid_until) {
+            return null;
+        }
+
+        $now = now();
+        $validUntil = $this->valid_until instanceof Carbon
+            ? $this->valid_until
+            : Carbon::parse($this->valid_until);
+
+        if ($validUntil->lt($now)) {
+            return 'expired';
+        }
+
+        if ($validUntil->lte($now->copy()->addDays(30))) {
+            return 'warning';
+        }
+
+        return 'ok';
     }
 }

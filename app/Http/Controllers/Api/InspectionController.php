@@ -111,6 +111,7 @@ class InspectionController extends Controller
             'inspection_type' => $inspection->inspection_type,
             'inspected_at' => $inspection->inspected_at?->toDateString(),
             'valid_until' => $inspection->valid_until?->toDateString(),
+            'status' => $inspection->status(),
         ];
     }
 }

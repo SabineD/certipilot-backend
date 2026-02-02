@@ -56,7 +56,7 @@ class Employee extends Model
 
         $certificate = $this->latestCertificate;
         if (!$certificate || !$certificate->valid_until) {
-            return 'expired';
+            return null;
         }
 
         $now = now();
