@@ -16,6 +16,11 @@ class UpdateCompanySettingsRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:255'],
             'email_notifications_enabled' => ['sometimes', 'boolean'],
+            'address' => ['nullable', 'string', 'max:255'],
+            'postal_code' => ['nullable', 'string', 'max:20'],
+            'city' => ['nullable', 'string', 'max:255'],
+            'country' => ['nullable', 'string', 'size:2'],
+            'vat_number' => ['nullable', 'string', 'max:50'],
         ];
     }
 }

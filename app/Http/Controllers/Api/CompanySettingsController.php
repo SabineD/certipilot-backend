@@ -39,6 +39,21 @@ class CompanySettingsController extends Controller
         if (array_key_exists('email_notifications_enabled', $data)) {
             $company->email_notifications_enabled = (bool) $data['email_notifications_enabled'];
         }
+        if (array_key_exists('address', $data)) {
+            $company->address = $data['address'];
+        }
+        if (array_key_exists('postal_code', $data)) {
+            $company->postal_code = $data['postal_code'];
+        }
+        if (array_key_exists('city', $data)) {
+            $company->city = $data['city'];
+        }
+        if (array_key_exists('country', $data)) {
+            $company->country = $data['country'];
+        }
+        if (array_key_exists('vat_number', $data)) {
+            $company->vat_number = $data['vat_number'];
+        }
         $company->save();
 
         return response()->json($this->formatCompany($company));
@@ -49,6 +64,11 @@ class CompanySettingsController extends Controller
         return [
             'id' => $company->id,
             'name' => $company->name,
+            'address' => $company->address,
+            'postal_code' => $company->postal_code,
+            'city' => $company->city,
+            'country' => $company->country,
+            'vat_number' => $company->vat_number,
             'email_notifications_enabled' => (bool) $company->email_notifications_enabled,
         ];
     }
