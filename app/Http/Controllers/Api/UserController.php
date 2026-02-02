@@ -20,7 +20,7 @@ class UserController extends Controller
 
         $users = User::where('company_id', $company->id)
             ->orderBy('created_at', 'desc')
-            ->get(['id', 'name', 'email', 'role', 'created_at']);
+            ->get(['id', 'name', 'email', 'role', 'created_at', 'is_active']);
 
         return response()->json($users);
     }
@@ -39,6 +39,7 @@ class UserController extends Controller
         $user->email = $data['email'];
         $user->role = $data['role'];
         $user->password = null;
+        $user->is_active = true;
         $user->save();
 
         SendUserInvitationMail::dispatch($user->id);
@@ -48,6 +49,7 @@ class UserController extends Controller
             'name' => $user->name,
             'email' => $user->email,
             'role' => $user->role,
+            'is_active' => (bool) $user->is_active,
         ], 201);
     }
 
@@ -83,6 +85,9 @@ class UserController extends Controller
         $user->name = $data['name'];
         $user->email = $data['email'];
         $user->role = $data['role'];
+        if (array_key_exists('is_active', $data)) {
+            $user->is_active = (bool) $data['is_active'];
+        }
         $user->save();
 
         return response()->json([
@@ -90,6 +95,7 @@ class UserController extends Controller
             'name' => $user->name,
             'email' => $user->email,
             'role' => $user->role,
+            'is_active' => (bool) $user->is_active,
         ]);
     }
 }

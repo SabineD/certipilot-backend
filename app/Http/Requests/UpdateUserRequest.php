@@ -33,6 +33,7 @@ class UpdateUserRequest extends FormRequest
                 User::ROLE_WERFLEIDER,
                 User::ROLE_PREVENTIEADVISEUR,
             ])],
+            'is_active' => ['nullable', 'boolean'],
         ];
     }
 }
