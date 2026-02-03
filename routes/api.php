@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\CompanySettingsController;
 use App\Http\Controllers\Api\RegisterController;
 use App\Http\Controllers\Auth\EmailVerificationNotificationController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\AIChatController;
 use Laravel\Sanctum\Http\Controllers\CsrfCookieController;
 
 Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
@@ -25,6 +26,8 @@ Route::post('/email/verification-notification', [EmailVerificationNotificationCo
     ->middleware(['auth:sanctum', 'throttle:6,1']);
 
 Route::middleware(['auth:sanctum', 'verified'])->group(function () {
+    Route::post('/ai/chat', [AIChatController::class, 'chat'])
+        ->middleware('throttle:20,1');
     Route::get('/search', [SearchController::class, 'index']);
     Route::get('/settings', [CompanySettingsController::class, 'show']);
     Route::put('/settings', [CompanySettingsController::class, 'update']);
