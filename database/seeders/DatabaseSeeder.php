@@ -22,6 +22,7 @@ class DatabaseSeeder extends Seeder
             MachineSeeder::class,
             InspectionTypeSeeder::class,
             CertificateTypeSeeder::class,
+            TrialSubscriptionSeeder::class,
         ]);
     }
 }

@@ -19,6 +19,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'verified' => \App\Http\Middleware\EnsureEmailIsVerified::class,
             'role' => \App\Http\Middleware\CheckRole::class,
+            'subscription.active' => \App\Http\Middleware\EnsureSubscriptionIsActive::class,
         ]);
 
         //

@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\SearchController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\CompanySettingsController;
 use App\Http\Controllers\Api\RegisterController;
+use App\Http\Controllers\Api\SubscriptionController;
 use App\Http\Controllers\Auth\EmailVerificationNotificationController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\AIChatController;
@@ -29,18 +30,25 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
     Route::post('/ai/chat', [AIChatController::class, 'chat'])
         ->middleware('throttle:20,1');
     Route::get('/search', [SearchController::class, 'index']);
+    Route::get('/subscription', [SubscriptionController::class, 'show']);
+    Route::post('/subscription/upgrade', [SubscriptionController::class, 'upgrade'])->middleware('role:admin');
+    Route::post('/subscription/cancel', [SubscriptionController::class, 'cancel'])->middleware('role:admin');
     Route::get('/settings', [CompanySettingsController::class, 'show']);
-    Route::put('/settings', [CompanySettingsController::class, 'update']);
+    Route::put('/settings', [CompanySettingsController::class, 'update'])->middleware('subscription.active');
 
     Route::middleware('role:admin,werfleider')->group(function () {
         Route::get('/sites', [SiteController::class, 'index']);
         Route::get('/sites/{id}', [SiteController::class, 'show']);
+
+        Route::get('/machines', [MachineController::class, 'index']);
+        Route::get('/machines/{id}', [MachineController::class, 'show']);
+    });
+
+    Route::middleware(['role:admin,werfleider', 'subscription.active'])->group(function () {
         Route::post('/sites', [SiteController::class, 'store']);
         Route::put('/sites/{id}', [SiteController::class, 'update']);
         Route::delete('/sites/{id}', [SiteController::class, 'destroy']);
 
-        Route::get('/machines', [MachineController::class, 'index']);
-        Route::get('/machines/{id}', [MachineController::class, 'show']);
         Route::post('/machines', [MachineController::class, 'store']);
         Route::put('/machines/{id}', [MachineController::class, 'update']);
         Route::delete('/machines/{id}', [MachineController::class, 'destroy']);
@@ -69,8 +77,8 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
 
     Route::middleware('role:admin')->group(function () {
         Route::get('/users', [UserController::class, 'index']);
-        Route::post('/users', [UserController::class, 'store']);
-        Route::put('/users/{id}', [UserController::class, 'update']);
+        Route::post('/users', [UserController::class, 'store'])->middleware('subscription.active');
+        Route::put('/users/{id}', [UserController::class, 'update'])->middleware('subscription.active');
     });
 });
 

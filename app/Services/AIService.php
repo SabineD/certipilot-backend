@@ -11,19 +11,32 @@ class AIService
     {
         $contextPayload = $this->encodeContext($context);
 
-        $response = OpenAI::chat()->create([
-            'model' => config('services.openai.model', 'gpt-4o-mini'),
-            'messages' => [
-                ['role' => 'system', 'content' => CertiPilotSystemPrompt::get()],
-                ['role' => 'system', 'content' => $contextPayload],
-                ['role' => 'user', 'content' => $userMessage],
-            ],
-            'temperature' => 0.2,
-        ]);
+        try {
+            $response = OpenAI::chat()->create([
+                'model' => config('services.openai.model', 'gpt-4o-mini'),
+                'messages' => [
+                    ['role' => 'system', 'content' => CertiPilotSystemPrompt::get()],
+                    ['role' => 'system', 'content' => 'Context: ' . $contextPayload],
+                    ['role' => 'user', 'content' => $userMessage],
+                ],
+                'temperature' => 0.2,
+                'max_tokens' => 600,
+            ]);
 
-        $content = $response->choices[0]->message->content ?? '';
+            $content = $response->choices[0]->message->content ?? '';
 
-        return trim($content);
+            if (! is_string($content) || trim($content) === '') {
+                return 'Ik kon geen antwoord genereren. Probeer het opnieuw of stel je vraag iets anders.';
+            }
+
+            return trim($content);
+        } catch (\Throwable $e) {
+            logger('AIService error', [
+                'message' => $e->getMessage(),
+            ]);
+
+            return 'Er ging iets mis bij het ophalen van een antwoord. Probeer het later opnieuw.';
+        }
     }
 
     private function encodeContext(array $context): string
